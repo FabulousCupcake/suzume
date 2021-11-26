@@ -1,0 +1,37 @@
+name: Master Branch
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  master-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Prepare zip
+        run: make build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::663412056516:role/GitHubActionsDeployLambda
+          role-session-name: github-actions-suzume-deploy
+          aws-region: eu-west-1
+
+      - name: Deploy
+        run: >
+          aws lambda update-function-code
+          --function arn:aws:lambda:eu-west-1:663412056516:function:suzume
+          --architectures arm64
+          --zip-file fileb://func.zip
