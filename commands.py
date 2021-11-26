@@ -1,3 +1,4 @@
+import boto3
 import logging
 import os
 import time
@@ -6,6 +7,8 @@ from random import randint
 from priconne.ugly.accounts import new_account
 from priconne.ugly.client import Client
 
+S3_BUCKET_NAME = "priconne-vanilla-statefiles"
+
 logger = logging.getLogger("command")
 
 def cmd_register(discord_user_id: str, viewer_id: int, password: str):
@@ -13,21 +16,18 @@ def cmd_register(discord_user_id: str, viewer_id: int, password: str):
 
     logger.debug(f"Creating new device profile for discord user {discord_user_id}…")
     c = new_account()
-    delay()
 
     logger.debug(f"Linking with {viewer_id}:{password}…")
     c.link_account(viewer_id, password)
-    delay()
 
     logger.debug("Logging in…")
     c.login()
-    delay()
 
-    state_file_path = f"state/{discord_user_id}.json"
+    state_file_path = f"/tmp/{discord_user_id}.json"
     logger.debug(f"Saving to state file {state_file_path}")
-    os.makedirs("state", exist_ok=True)
     c.set_state_file(state_file_path)
     c.flush_state()
+    upload_to_s3(discord_user_id)
 
     return c.misc["user_data"]
 
@@ -38,26 +38,50 @@ def cmd_login(discord_user_id: str):
 
     logger.debug("Logging in…")
     c.login()
+    upload_to_s3(discord_user_id)
 
     return c.misc["user_data"]
 
 def cmd_check(discord_user_id: str):
+    download_from_s3(discord_user_id)
     state_file_path = f"state/{discord_user_id}.json"
     return os.path.exists(state_file_path)
 
 def cmd_disable(discord_user_id: str):
+    download_from_s3(discord_user_id)
     state_file_path = f"state/{discord_user_id}.json"
     file_exists = os.path.exists(state_file_path)
 
     if (file_exists):
-        unix_timestamp = int(time.time())
-        new_file_path = f"state/{discord_user_id}-disabled-{unix_timestamp}.json"
-        os.rename(state_file_path, new_file_path)
+        disable_in_s3(discord_user_id)
         return True
 
     return False
 
 # ------------------------------------------------------------------------------
 
-def delay():
-    time.sleep(randint(500,1000) / 1000)
+def upload_to_s3(discord_user_id: str):
+    filename = f"{discord_user_id}.json"
+    filepath = f"/tmp/{filename}"
+
+    s3 = boto3.resource('s3')
+    s3.Object(S3_BUCKET_NAME, filename).upload_file(filepath)
+
+def download_from_s3(discord_user_id: str):
+    filename = f"{discord_user_id}.json"
+    filepath = f"/tmp/{filename}"
+
+    s3 = boto3.resource('s3')
+    s3.Object(S3_BUCKET_NAME, filename).download_file(filepath)
+
+def disable_in_s3(discord_user_id: str):
+    unix_timestamp = int(time.time())
+    filename_disabled = f"{discord_user_id}-disabled-{unix_timestamp}.json"
+    filename_original = f"{discord_user_id}.json"
+
+    s3 = boto3.resource('s3')
+    s3.Object(S3_BUCKET_NAME, filename_disabled).copy_from(CopySource={
+        "Bucket": S3_BUCKET_NAME,
+        "Key": filename_original,
+    })
+    s3.Object(S3_BUCKET_NAME, filename_original).delete()
