@@ -1,0 +1,3 @@
+[submodule "priconne"]
+	path = priconne
+	url = git@github.com:FabulousCupcake/priconne-api.git
