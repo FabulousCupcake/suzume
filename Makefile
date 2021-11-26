@@ -8,10 +8,15 @@ WARN_COLOR=\033[33;01m
 all: clean build
 	@echo "$(OK_COLOR)==> Done!$(NOCOLOR)"
 
-build: clean
+build: clean prepare-deps
 	@echo "$(OK_COLOR)==> Building zip file $(NO_COLOR)"
-	@zip -r func.zip priconne *.py
+	@zip -r func.zip priconne python *.py
+
+prepare-deps:
+	@echo "$(OK_COLOR)==> Preparing deps $(NO_COLOR)"
+	@pip install -r requirements.txt -t python
 
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project… $(NO_COLOR)"
 	@rm -rf func.zip
+	@rm -rf python
