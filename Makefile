@@ -10,7 +10,8 @@ all: clean build
 
 build: clean prepare-deps
 	@echo "$(OK_COLOR)==> Building zip file $(NO_COLOR)"
-	@zip -r func.zip priconne python *.py
+	@cd python && zip -r ../func.zip .
+	@zip -r func.zip priconne *.py -x priconne/.git
 
 prepare-deps:
 	@echo "$(OK_COLOR)==> Preparing deps $(NO_COLOR)"
