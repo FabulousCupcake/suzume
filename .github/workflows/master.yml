@@ -1,9 +1,14 @@
 name: Master Branch
+
 on:
   workflow_dispatch:
   push:
     branches:
       - master
+
+concurrency:
+  group: master-deploy
+  cancel-in-progress: true
 
 permissions:
   id-token: write
