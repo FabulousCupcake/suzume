@@ -12,12 +12,8 @@ COMMAND_MAP = {
 }
 
 def main(event, context):
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="[%(levelname)s] %(name)s - %(asctime)s: %(message)s"
-    )
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # Parse arguments
     command = event["command"]

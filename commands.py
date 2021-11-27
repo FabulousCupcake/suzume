@@ -11,7 +11,7 @@ from priconne.ugly.client import Client
 S3_BUCKET_NAME = "priconne-vanilla-statefiles"
 
 logger = logging.getLogger("command")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def cmd_register(discord_user_id: str, viewer_id: int, password: str):
     viewer_id = int(viewer_id)
