@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import sys
 
 from commands import cmd_login, cmd_register, cmd_check, cmd_disable
@@ -27,7 +28,9 @@ def main(event, context):
         sys.exit(1)
 
     logger.info(f"Executing {command} with params {command_params}")
-    return command_func(*command_params)
+    result = command_func(*command_params)
+    cleanup_json(command_params[0])
+    return result
 
 if __name__ == "__main__":
     event = {
@@ -37,3 +40,8 @@ if __name__ == "__main__":
     context = {}
     result = main(event, context)
     print(json.dumps(result))
+
+def cleanup_json(discord_user_id):
+    filepath = f"/tmp/{discord_user_id}.json"
+    if os.path.exists(filepath):
+        os.remove(filepath)
