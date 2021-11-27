@@ -41,9 +41,10 @@ jobs:
       - name: Package
         id: package
         run: |
-          OUTPUT="$(sam package --s3-bucket suzume-lambda --region eu-west-1)"
-          S3_BUCKET="$(echo "$OUTPUT" | grep -Eo "s3:\/\/(.+?) " | cut -d "/" -f 3)"
-          S3_KEY="$(echo "$OUTPUT" | grep -Eo "s3:\/\/(.+?) " | cut -d "/" -f 4)"
+          OUTPUT="$(sam package --s3-bucket suzume-lambda --region eu-west-1 --force-upload)"
+          S3_URI="$(echo "$OUTPUT" | grep -Eo "s3:\/\/(.+)")"
+          S3_BUCKET="$(echo "$S3_URI" | cut -d "/" -f 3)"
+          S3_KEY="$(echo "$S3_URI" | cut -d "/" -f 4)"
           echo "::set-output name=s3_bucket::$S3_BUCKET"
           echo "::set-output name=s3_key::$S3_KEY"
           echo "::set-output name=s3_uri::$S3_URI"
