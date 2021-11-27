@@ -1,5 +1,6 @@
 beautifulsoup4==4.10.0
 bs4==0.0.1
 msgpack==1.0.2
+pycryptodome==3.11.0
 requests==2.25.1
 soupsieve==2.3.1
