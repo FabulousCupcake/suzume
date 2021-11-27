@@ -34,31 +34,29 @@ def cmd_register(discord_user_id: str, viewer_id: int, password: str):
     return c.misc["user_data"]
 
 def cmd_login(discord_user_id: str):
-    state_file_path = f"/tmp/{discord_user_id}.json"
-    logger.debug(f"Loading from state file {state_file_path}")
-    c = Client.from_state_file(state_file_path)
+    state_file_path = download_from_s3(discord_user_id)
+    if (not state_file_path):
+        return False
 
-    logger.debug("Logging in…")
+    c = Client.from_state_file(state_file_path)
     c.login()
     upload_to_s3(discord_user_id)
 
     return c.misc["user_data"]
 
 def cmd_check(discord_user_id: str):
-    download_from_s3(discord_user_id)
-    state_file_path = f"/tmp/{discord_user_id}.json"
+    state_file_path = download_from_s3(discord_user_id)
+    if (not state_file_path):
+        return False
     return os.path.exists(state_file_path)
 
 def cmd_disable(discord_user_id: str):
-    download_from_s3(discord_user_id)
-    state_file_path = f"/tmp/{discord_user_id}.json"
-    file_exists = os.path.exists(state_file_path)
+    state_file_path = download_from_s3(discord_user_id)
+    if (not state_file_path):
+        return False
 
-    if (file_exists):
-        disable_in_s3(discord_user_id)
-        return True
-
-    return False
+    disable_in_s3(discord_user_id)
+    return True
 
 # ------------------------------------------------------------------------------
 
@@ -80,8 +78,9 @@ def download_from_s3(discord_user_id: str):
     except ClientError as e:
         if e.response["Error"]["Message"] == "Not Found":
             logger.info(f"{filename} not found in s3")
-            return False
+            return ""
 
+    return filepath
 
 def disable_in_s3(discord_user_id: str):
     unix_timestamp = int(time.time())
