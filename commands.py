@@ -34,7 +34,7 @@ def cmd_register(discord_user_id: str, viewer_id: int, password: str):
     return c.misc["user_data"]
 
 def cmd_login(discord_user_id: str):
-    state_file_path = f"state/{discord_user_id}.json"
+    state_file_path = f"/tmp/{discord_user_id}.json"
     logger.debug(f"Loading from state file {state_file_path}")
     c = Client.from_state_file(state_file_path)
 
@@ -46,12 +46,12 @@ def cmd_login(discord_user_id: str):
 
 def cmd_check(discord_user_id: str):
     download_from_s3(discord_user_id)
-    state_file_path = f"state/{discord_user_id}.json"
+    state_file_path = f"/tmp/{discord_user_id}.json"
     return os.path.exists(state_file_path)
 
 def cmd_disable(discord_user_id: str):
     download_from_s3(discord_user_id)
-    state_file_path = f"state/{discord_user_id}.json"
+    state_file_path = f"/tmp/{discord_user_id}.json"
     file_exists = os.path.exists(state_file_path)
 
     if (file_exists):
