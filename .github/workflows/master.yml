@@ -24,14 +24,6 @@ jobs:
           submodules: true
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: Install deps
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Prepare zip
-        run: make build
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -39,9 +31,25 @@ jobs:
           role-session-name: github-actions-suzume-deploy
           aws-region: eu-west-1
 
+      - name: Build
+        run: sam build --use-container
+
+      - name: Package
+        id: package
+        run: |
+          OUTPUT="$(sam package --s3-bucket suzume-lambda --region eu-west-1)"
+          S3_BUCKET="$(echo "$OUTPUT" | grep -Eo "s3:\/\/(.+?) " | cut -d "/" -f 3)"
+          S3_KEY="$(echo "$OUTPUT" | grep -Eo "s3:\/\/(.+?) " | cut -d "/" -f 4)"
+          echo "::set-output name=s3_bucket::$S3_BUCKET"
+          echo "::set-output name=s3_key::$S3_KEY"
+          echo "::set-output name=s3_uri::$S3_URI"
+
       - name: Deploy
         run: >
           aws lambda update-function-code
           --function arn:aws:lambda:eu-west-1:663412056516:function:suzume
-          --architectures arm64
-          --zip-file fileb://func.zip
+          --s3-bucket ${{ steps.package.outputs.s3_bucket }}
+          --s3-key ${{ steps.package.outputs.s3_key }}
+
+      - name: Cleanup
+        run: aws s3 delete ${{ steps.package.outputs.s3_uri }}
