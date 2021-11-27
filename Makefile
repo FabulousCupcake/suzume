@@ -17,6 +17,14 @@ prepare-deps:
 	@echo "$(OK_COLOR)==> Preparing deps $(NO_COLOR)"
 	@pip install -r requirements.txt -t python
 
+deploy-sam: build-sam
+	@echo "$(OK_COLOR)==> Uploading AWS SAM build to S3… $(NO_COLOR)"
+	@sam package --s3-bucket suzume-lambda --region eu-west-1
+
+build-sam:
+	@echo "$(OK_COLOR)==> Building project with AWS SAM… $(NO_COLOR)"
+	@sam build --use-container
+
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project… $(NO_COLOR)"
 	@rm -rf func.zip
