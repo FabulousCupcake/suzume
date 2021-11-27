@@ -72,7 +72,14 @@ def download_from_s3(discord_user_id: str):
     filepath = f"/tmp/{filename}"
 
     s3 = boto3.resource('s3')
-    s3.Object(S3_BUCKET_NAME, filename).download_file(filepath)
+
+    try:
+        s3.Object(S3_BUCKET_NAME, filename).download_file(filepath)
+    except ClientError as e:
+        if e.response["Error"]["Message"] == "Not Found":
+            logger.info(f"{filename} not found in s3")
+            return false
+
 
 def disable_in_s3(discord_user_id: str):
     unix_timestamp = int(time.time())
