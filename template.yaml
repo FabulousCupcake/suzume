@@ -11,7 +11,7 @@ Resources:
   Suzume:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./
+      CodeUri: python
       Handler: main.main
       PackageType: Zip
       Runtime: python3.9

@@ -32,7 +32,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Build
-        run: sam build --use-container
+        run: make build-sam
 
       - name: Package
         id: package
