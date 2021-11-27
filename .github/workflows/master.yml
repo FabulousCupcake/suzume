@@ -57,4 +57,4 @@ jobs:
           --s3-key ${{ steps.package.outputs.s3_key }}
 
       - name: Cleanup
-        run: aws s3 delete ${{ steps.package.outputs.s3_uri }}
+        run: aws s3 rm ${{ steps.package.outputs.s3_uri }}
