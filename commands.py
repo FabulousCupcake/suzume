@@ -11,6 +11,7 @@ from priconne.ugly.client import Client
 S3_BUCKET_NAME = "priconne-vanilla-statefiles"
 
 logger = logging.getLogger("command")
+logger.setLevel(logging.DEBUG)
 
 def cmd_register(discord_user_id: str, viewer_id: int, password: str):
     viewer_id = int(viewer_id)
@@ -79,7 +80,7 @@ def download_from_s3(discord_user_id: str):
     except ClientError as e:
         if e.response["Error"]["Message"] == "Not Found":
             logger.info(f"{filename} not found in s3")
-            return false
+            return False
 
 
 def disable_in_s3(discord_user_id: str):
