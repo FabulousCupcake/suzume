@@ -27,8 +27,7 @@ def main(event, context):
         sys.exit(1)
 
     logger.info(f"Executing {command} with params {command_params}")
-    result = command_func(*command_params)
-    print(json.dumps(result))
+    return command_func(*command_params)
 
 if __name__ == "__main__":
     event = {
@@ -36,4 +35,5 @@ if __name__ == "__main__":
         "args": sys.argv[2:],
     }
     context = {}
-    main(event, context)
+    result = main(event, context)
+    print(json.dumps(result))
