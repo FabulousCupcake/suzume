@@ -1,3 +1,4 @@
 msgpack==1.0.2
 pycryptodome==3.11.0
 requests==2.25.1
+throttler==1.2.1
